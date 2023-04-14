@@ -1,0 +1,27 @@
+var image = ee.Image(ee.ImageCollection('LANDSAT/LC08/C01/T1_SR')
+    .filterBounds(roi)
+    .filterDate('2018-05-01', '2018-06-30')
+    .sort('CLOUD_COVER')
+    .first());
+    
+    
+  
+Map.addLayer(image, {bands: ['B4', 'B3', 'B2'],min:0, max: 3000}, 'True colour image');
+Map.addLayer(image, {bands: ['B5', 'B4', 'B3'],min:0, max: 3000}, 'False colour composite');
+
+//Define variable NDVI from equation
+var NDVI = image.expression(
+    "(NIR - RED) / (NIR + RED)",
+    {
+      RED:image.select("B4"),    //  RED
+      NIR: image.select("B5"),    // NIR
+      BLUE:image.select("B2")    // BLUE
+    });
+
+Map.addLayer(NDVI, {min: 0, max: 1}, "NDVI");
+
+// Export.image.toDrive({
+//   image: image,
+//   description: 'NDVI-Result',
+//   scale: 30,
+//   region: roi
